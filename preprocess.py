@@ -105,5 +105,17 @@ def load_data():
     return train_X, train_y, valid_X, valid_y, test_X, test_y, word_encoder
 
 
+def load_all_data():
+    print("Loading all data samples")
+    out_df_list = []
+    for c_path in ALL_TRAIN_PATHS:
+        c_df = pd.read_csv(c_path)
+        c_df.columns = COL_NAMES
+        out_df_list += [c_df[['drawing', 'word']]]
+    full_df = pd.concat(out_df_list)
+    full_df['drawing'] = full_df['drawing'].map(stroke_vector)    
+    return full_df
+    
+
 if __name__ == "__main__":
     load_data()
