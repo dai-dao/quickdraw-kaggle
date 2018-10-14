@@ -37,9 +37,10 @@ def stroke_vector(raw_strokes):
     c_strokes[:,2] = [1] + np.diff(c_strokes[:,2]).tolist()
     c_strokes[:,2] += 1 # since 0 is no stroke
     # pad the strokes with zeros
-    return pad_sequences(c_strokes.swapaxes(0, 1), 
-                         maxlen=STROKE_COUNT, 
-                         padding='post').swapaxes(0, 1)
+    return c_strokes
+    #     return pad_sequences(c_strokes.swapaxes(0, 1), 
+#                          maxlen=STROKE_COUNT, 
+#                          padding='post').swapaxes(0, 1)
 
 
 def read_batch(samples=5, 
