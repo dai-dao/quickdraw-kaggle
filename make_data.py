@@ -1,4 +1,5 @@
 from dask import dataframe as dd
+import dask
 from dask.multiprocessing import get
 from multiprocessing import cpu_count
 nCores = cpu_count()
@@ -29,20 +30,30 @@ print("Full shape", full_df.shape)
 print(full_df.info(memory_usage='deep'))
 full_df = full_df.reset_index(drop=True)
 
-
 gc.collect()
 
-start = time.time()
 
-print("Start processing data in parallel")
+# Set context for dask
 # ALWAYS use processes scheduler
-full_df['drawing'] = dd.from_pandas(full_df['drawing'],npartitions=nCores).\
-   map_partitions(
-      lambda d : d.apply(stroke_vector), meta=object).\
-   compute(scheduler='processes')
+dask.config.set(scheduler='processes')
 
-print('Total time to process all training data', time.time() - start)
-full_df.info(memory_usage='deep')
 
-print("Writing to csv")
-full_df.to_csv("full_data.csv", index=False)
+start = time.time()
+print("Start processing data in parallel")
+
+ddf = dd.from_pandas(full_df, npartitions=int(nCores / 2))
+ddf['drawing'] = ddf['drawing']. \
+                        map_partitions(
+                              lambda d : d.apply(stroke_vector), meta=object)
+ddf.to_csv('input/train_processed/train-*.csv')
+
+print('Total time to process / save all training data', time.time() - start)
+
+
+# full_df['drawing'] = dd.from_pandas(full_df['drawing'],npartitions=nCores).\
+#    map_partitions(
+#       lambda d : d.apply(stroke_vector), meta=object).\
+#    compute(scheduler='processes')
+# full_df.info(memory_usage='deep')
+# print("Writing to csv")
+# full_df.to_csv("full_data.csv", index=False)
